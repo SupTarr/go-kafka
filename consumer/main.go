@@ -46,7 +46,7 @@ func main() {
 				}
 				log.Panicf("Error from consumer: %v", err)
 			}
-			// check if context was cancelled, signaling that the consumer should stop
+
 			if ctx.Err() != nil {
 				return
 			}
@@ -66,15 +66,16 @@ func main() {
 	for keepRunning {
 		select {
 		case <-ctx.Done():
-			log.Println("terminating: context cancelled")
+			log.Println("Terminating: context cancelled")
 			keepRunning = false
 		case <-sigterm:
-			log.Println("terminating: via signal")
+			log.Println("Terminating: via signal")
 			keepRunning = false
 		case <-sigusr1:
 			toggleConsumptionFlow(client, &consumptionIsPaused)
 		}
 	}
+
 	cancel()
 	wg.Wait()
 	if err = client.Close(); err != nil {
