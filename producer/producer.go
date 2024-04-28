@@ -1,28 +1,74 @@
 package producer
 
 import (
-	"log"
+	"sync"
 
 	"github.com/IBM/sarama"
 )
 
-func main() {
-	brokers := []string{"localhost:9092"}
+type Producer struct {
+	topic            string
+	producersLock    sync.Mutex
+	producers        []sarama.AsyncProducer
+	producerProvider func() sarama.AsyncProducer
+}
 
-	producer, err := sarama.NewSyncProducer(brokers, nil)
-	if err != nil {
-		log.Panicf("Error creating producer: %v", err)
+func NewProducer(config *sarama.Config, topic string, brokers []string) *Producer {
+	return &Producer{
+		topic: topic,
+		producerProvider: func() sarama.AsyncProducer {
+			producer, err := sarama.NewAsyncProducer(brokers, config)
+			if err != nil {
+				return nil
+			}
+			return producer
+		},
 	}
-	defer producer.Close()
+}
 
-	msg := sarama.ProducerMessage{
-		Topic: "suptarr",
-		Value: sarama.StringEncoder("Hello, Sarama!"),
+func (p *Producer) Borrow() (producer sarama.AsyncProducer) {
+	p.producersLock.Lock()
+	defer p.producersLock.Unlock()
+
+	if len(p.producers) == 0 {
+		for {
+			producer = p.producerProvider()
+			if producer != nil {
+				return
+			}
+		}
 	}
 
-	p, o, err := producer.SendMessage(&msg)
-	if err != nil {
-		log.Panicf("Error send message from producer: %v", err)
+	index := len(p.producers) - 1
+	producer = p.producers[index]
+	p.producers = p.producers[:index]
+	return
+}
+
+func (p *Producer) Release(producer sarama.AsyncProducer) {
+	p.producersLock.Lock()
+	defer p.producersLock.Unlock()
+
+	if producer.TxnStatus()&sarama.ProducerTxnFlagInError != 0 {
+		_ = producer.Close()
+		return
 	}
-	log.Printf("Message sent to partition %d at offset %d\n", p, o)
+	p.producers = append(p.producers, producer)
+}
+
+func (p *Producer) Clear() {
+	p.producersLock.Lock()
+	defer p.producersLock.Unlock()
+
+	for _, producer := range p.producers {
+		producer.Close()
+	}
+	p.producers = p.producers[:0]
+}
+
+func (p *Producer) Produce(message string) {
+	producer := p.Borrow()
+	defer p.Release(producer)
+
+	producer.Input() <- &sarama.ProducerMessage{Topic: p.topic, Key: nil, Value: sarama.StringEncoder(string(message))}
 }

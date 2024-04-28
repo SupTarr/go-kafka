@@ -20,9 +20,9 @@ type Consumer struct {
 	group   string
 }
 
-func NewConsumer(brokers []string, topics []string, group string) *Consumer {
+func NewConsumer(config *sarama.Config, brokers []string, topics []string, group string) *Consumer {
 	return &Consumer{
-		config:  sarama.NewConfig(),
+		config:  config,
 		ready:   make(chan bool),
 		brokers: brokers,
 		topics:  topics,
