@@ -26,13 +26,11 @@ docker-compose up -d
 ```
 
 2. **Verify Kafka:**
-
 You can use Kafdrop to view the Kafka cluster status by navigating to `http://localhost:9000` in your web browser.
 
 ## Running the Application
 
 1. **Tidy Go Modules:**
-
 Ensure all dependencies are downloaded.
 
 ```sh
@@ -40,7 +38,6 @@ go mod tidy
 ```
 
 2. **Run the Application:**
-
 This command will build and run the [`main.go`](main.go) application. It starts a consumer goroutine and then continuously produces messages to the `topic` topic.
 
 ```sh
