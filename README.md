@@ -21,9 +21,9 @@ This project demonstrates a simple Kafka producer and consumer implementation in
 1. **Start the Kafka Cluster:**
 Use Docker Compose to start Kafka, Zookeeper, and Kafdrop (a web UI for Kafka).
 
-```sh
-docker-compose up -d
-```
+    ```sh
+    docker-compose up -d
+    ```
 
 2. **Verify Kafka:**
 You can use Kafdrop to view the Kafka cluster status by navigating to `http://localhost:9000` in your web browser.
@@ -33,16 +33,16 @@ You can use Kafdrop to view the Kafka cluster status by navigating to `http://lo
 1. **Tidy Go Modules:**
 Ensure all dependencies are downloaded.
 
-```sh
-go mod tidy
-```
+    ```sh
+    go mod tidy
+    ```
 
 2. **Run the Application:**
 This command will build and run the [`main.go`](main.go) application. It starts a consumer goroutine and then continuously produces messages to the `topic` topic.
 
-```sh
-go run main.go
-```
+    ```sh
+    go run main.go
+    ```
 
 You should see logs from both the producer sending messages and the consumer receiving them in your terminal.
 
