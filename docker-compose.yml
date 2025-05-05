@@ -30,13 +30,3 @@ services:
       KAFKA_BROKERCONNECT: "kafka-server:29092"
     depends_on:
       - "kafka-server"
-
-  mysql:
-    image: mariadb
-    environment:
-      - MARIADB_ROOT_PASSWORD=P@ssw0rd
-      - MARIADB_DATABASE=micro
-      - MARIADB_USER=bond
-      - MARIADB_PASSWORD=P@ssw0rd
-    ports:
-      - 3306:3306
